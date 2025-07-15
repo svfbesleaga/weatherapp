@@ -117,3 +117,13 @@ Below are some example background images used in the app (located in `public/`):
 | ![](public/ai-bg-cloudy-night.png) | ![](public/ai-bg-rain-day.png) | ![](public/ai-bg-snow-evening.png) | ![](public/ai-bg-storm-day.png) |
 
 You can find and customize more backgrounds in the `public/` directory.
+
+
+
+Below are some examples of the app running on localhost (located in `examples/`):
+
+
+| Athens                | Cluj                  | Johannesburg              | New York                 |
+|---------------------------|----------------------------|---------------------------|---------------------------|
+| ![](examples/athens.png) | ![](examples/cluj.png) | ![](examples/johannesburg.png) | ![](examples/newyork.png) |
+
