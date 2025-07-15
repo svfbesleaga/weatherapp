@@ -25,9 +25,6 @@
   width: auto;
   min-height: 0;
 }
-.activity-widget.expanded {
-  /* No extra styles, but class for targeting if needed */
-}
 .activity-titlebar {
   display: flex;
   align-items: center;

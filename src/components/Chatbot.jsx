@@ -6,12 +6,7 @@ const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
 const WEATHER_API_URL = import.meta.env.VITE_WEATHER_API_URL;
 
-function extractCity(text) {
-  // Simple regex for demo: look for 'in <city>' or 'at <city>'
-  const match = text.match(/(?:in|at) ([A-Za-z\s]+)/i);
-  if (match) return match[1].trim();
-  return null;
-}
+
 
 async function fetchWeather(city) {
   const url = `${WEATHER_API_URL}?q=${encodeURIComponent(city)}&appid=${WEATHER_API_KEY}&units=metric`;
@@ -79,7 +74,7 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
         setIsGeneratingActivities(true);
       }
       
-    } catch (e) {
+    } catch {
       setWeatherInfo(null);
       setMessages([...messages, { sender: 'user', text: input }, { sender: 'bot', text: 'City not found. Please enter a valid city name.' }]);
       setInput('');
@@ -138,12 +133,9 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
         // If no activities were extracted or list is empty, generate defaults
         if (!acts || acts.length === 0) {
           const weather = weatherInfo.desc.toLowerCase();
-          const temp = weatherInfo.temp;
           const city = weatherInfo.city;
           const isNight = timeOfDay === 'night';
           const isEvening = timeOfDay === 'evening';
-          const isCold = temp < 10;
-          const isWarm = temp > 25;
           
           let defaultActivities = [];
           
@@ -250,7 +242,7 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
           setIsGeneratingActivities(false);
         }
       }
-    } catch (err) {
+    } catch {
       setMessages(msgs => [
         ...msgs,
         { sender: 'bot', text: 'Error: Could not reach OpenAI.' }
