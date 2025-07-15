@@ -1,0 +1,193 @@
+.activity-widget {
+  position: fixed;
+  min-width: 0;
+  max-width: 340px;
+  background: rgba(255,255,255,0.0032);
+  /* box-shadow: 0 8px 32px 0 rgba(31,38,135,0.25); */
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  padding: 0;
+  display: inline-flex;
+  flex-direction: column;
+  color: #222;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 500;
+  animation: activity-popin 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+  margin-bottom: 0.5rem;
+  user-select: none;
+  left: 2.5rem;
+  right: auto;
+  align-items: flex-start;
+  width: auto;
+  min-height: 0;
+}
+.activity-widget.expanded {
+  /* No extra styles, but class for targeting if needed */
+}
+.activity-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.1rem 1.2rem 1.1rem 1.1rem;
+  border-radius: 20px 20px 0 0;
+  cursor: grab;
+  background: rgba(255,255,255,0.0018);
+  font-weight: 600;
+  width: 100%;
+  min-width: 0;
+}
+.activity-titlebar:active {
+  cursor: grabbing;
+}
+.activity-emoji {
+  font-size: 1.7rem;
+  margin-right: 0.2rem;
+  filter: drop-shadow(0 2px 8px #fff8);
+}
+.activity-title {
+  flex: 1;
+  word-break: break-word;
+  font-weight: 600;
+  font-size: 1.2rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+}
+.activity-expand {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #444;
+  margin-left: 0.5rem;
+  padding: 0 0.2rem;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+.activity-expand:hover {
+  background: #e0eafc88;
+}
+.activity-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #888;
+  margin-left: 0.5rem;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.activity-close:hover {
+  background: #e0eafc88;
+  color: #c00;
+}
+.activity-details {
+  padding: 0.7rem 1.2rem 1.1rem 2.5rem;
+  font-size: 1rem;
+  color: #333;
+  background: rgba(255,255,255,0.0018);
+  border-radius: 0 0 20px 20px;
+  border-top: 1px solid #e0eafc44;
+  box-shadow: 0 2px 8px #e0eafc22;
+  width: 100%;
+  min-width: 0;
+  max-width: 340px;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.activity-widget.activity-list-widget {
+  position: fixed;
+  top: 27rem;
+  left: 2.5rem;
+  width: 80vw;
+  min-width: 0;
+  max-width: 1200px;
+  background: rgba(255,255,255,0.0032);
+  box-shadow: none;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.18);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Segoe UI', 'Arial', sans-serif;
+  font-size: 1.08rem;
+  font-weight: 500;
+  animation: activity-popin 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+  margin-bottom: 0.5rem;
+  user-select: none;
+  align-items: flex-start;
+  z-index: 30;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  margin-right: 420px; /* Prevent overlap with Chatbot (400px + 2rem) */
+}
+.activity-titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 1.1rem 1.2rem 1.1rem 1.1rem;
+  border-radius: 20px 20px 0 0;
+  background: rgba(255,255,255,0.0018);
+  font-weight: 600;
+  width: 100%;
+}
+.activity-emoji {
+  font-size: 1.7rem;
+  margin-right: 0.2rem;
+  filter: drop-shadow(0 2px 8px #fff8);
+}
+.activity-title {
+  flex: 1;
+  word-break: break-word;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+.activity-list {
+  list-style: disc inside;
+  margin: 0;
+  padding: 1.1rem 1.2rem 1.1rem 2.5rem;
+  width: 100%;
+  font-size: 1.08rem;
+  color: #333;
+  background: rgba(255,255,255,0.0018);
+  border-radius: 0 0 20px 20px;
+  border-top: 1px solid #e0eafc44;
+  box-shadow: 0 2px 8px #e0eafc22;
+  box-sizing: border-box;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+.activity-list-item {
+  margin-bottom: 0.7rem;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  box-sizing: border-box;
+}
+.activity-widget,
+.activity-widget.activity-list-widget,
+.activity-titlebar,
+.activity-title,
+.activity-list,
+.activity-list-item,
+.activity-details {
+  color: #000 !important;
+}
+@keyframes activity-popin {
+  0% { opacity: 0; transform: scale(0.7) translateY(30px); }
+  80% { opacity: 1; transform: scale(1.05) translateY(-4px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+} 
