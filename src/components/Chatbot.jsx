@@ -76,7 +76,7 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       return;
     }
     // Compose system prompt
-    let systemPrompt = `You are a helpful assistant named Busu. You are only allowed to answer questions about the weather. You are not allowed to answer questions about anything else.`;
+    let systemPrompt = `You are a helpful assistant named FlorAI. You are only allowed to answer questions about the weather, and suggest activities based on the weather. You are not allowed to answer questions about anything else.`;
     if (weatherInfo) {
       systemPrompt += `\nThe current weather in ${weatherInfo.city} is ${weatherInfo.temp}°C, ${weatherInfo.desc}.`;
       if (timeOfDay) {
@@ -84,6 +84,7 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       }
       systemPrompt += `\nBased on these conditions, suggest some suitable activities for the user. Be specific and creative, and explain why each activity fits the weather and time of day. If it is NIGHT, avoid suggesting activities that are not possible or safe at night (such as visiting parks or outdoor attractions that may be closed). Consider the user's location (${weatherInfo.city}), the weather, and the time of day (${timeOfDay.toUpperCase()}), and suggest activities that are relevant or unique to that city or region, not just generic weather-based suggestions. Output the activities as a numbered list, each on a new line.`;
     }
+    console.log(systemPrompt);
     // Call GPT with 5s longer timeout
     try {
       const fetchWithTimeout = (url, options, timeoutMs) => {
@@ -116,6 +117,7 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       );
       const data = await response.json();
       const reply = data.choices?.[0]?.message?.content || 'No response.';
+      console.log(reply);
       setMessages(msgs => [
         ...msgs,
         { sender: 'bot', text: "Suggesting some activities for you to do .. " }
@@ -123,7 +125,119 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       // Extract activities from reply
       if (setActivities && weatherInfo) {
         const acts = (reply.match(/\d+\.\s+(.+?)(?=\n\d+\.|$)/gs) || []).map(s => s.replace(/^\d+\.\s+/, '').trim());
-        setActivities(acts);
+        console.log(acts);
+        
+        // If no activities were extracted or list is empty, generate defaults
+        if (!acts || acts.length === 0) {
+          console.log('No activities extracted from OpenAI, generating defaults...');
+          const weather = weatherInfo.desc.toLowerCase();
+          const temp = weatherInfo.temp;
+          const city = weatherInfo.city;
+          const isNight = timeOfDay === 'night';
+          const isEvening = timeOfDay === 'evening';
+          const isCold = temp < 10;
+          const isWarm = temp > 25;
+          
+          let defaultActivities = [];
+          
+          if (weather.includes('rain') || weather.includes('shower')) {
+            if (isNight || isEvening) {
+              defaultActivities = [
+                `Enjoy a cozy evening at a warm café in ${city} with a hot drink`,
+                `Visit an indoor cinema to watch a movie`,
+                `Explore a local bookstore and browse for interesting reads`,
+                `Try a traditional restaurant for a hearty dinner`,
+                `Visit a museum or art gallery if open in the evening`
+              ];
+            } else {
+              defaultActivities = [
+                `Visit an indoor museum or cultural center in ${city}`,
+                `Explore covered markets and local shops`,
+                `Enjoy coffee and pastries at a cozy café`,
+                `Visit a library or indoor cultural space`,
+                `Try indoor activities like bowling or arcade games`
+              ];
+            }
+          } else if (weather.includes('snow')) {
+            if (isNight || isEvening) {
+              defaultActivities = [
+                `Take evening photos of snow-covered landmarks in ${city}`,
+                `Warm up at a traditional pub or tavern`,
+                `Enjoy hot chocolate at a cozy winter café`,
+                `Visit heated indoor attractions or venues`,
+                `Take a romantic evening walk through snowy streets`
+              ];
+            } else {
+              defaultActivities = [
+                `Build a snowman in a local park in ${city}`,
+                `Take scenic photos of the winter landscape`,
+                `Try winter sports if facilities are available nearby`,
+                `Visit warm indoor attractions like museums`,
+                `Enjoy hot drinks at mountain lodges or cafés`
+              ];
+            }
+          } else if (weather.includes('sun') || weather.includes('clear')) {
+            if (isNight || isEvening) {
+              defaultActivities = [
+                `Take an evening stroll through ${city}'s illuminated streets`,
+                `Enjoy outdoor dining at a restaurant terrace`,
+                `Visit rooftop bars or outdoor venues for night views`,
+                `Explore night markets or evening festivals`,
+                `Take sunset/evening photos at scenic viewpoints`
+              ];
+            } else {
+              defaultActivities = [
+                `Take a walking tour of ${city}'s main attractions`,
+                `Visit outdoor parks and gardens`,
+                `Explore local markets and street vendors`,
+                `Have a picnic in a scenic location`,
+                `Take photos at famous landmarks and viewpoints`
+              ];
+            }
+          } else if (weather.includes('cloud')) {
+            if (isNight || isEvening) {
+              defaultActivities = [
+                `Explore ${city}'s nightlife and entertainment districts`,
+                `Visit local pubs or bars for drinks and socializing`,
+                `Take an evening city tour to see illuminated buildings`,
+                `Enjoy dinner at a restaurant with local cuisine`,
+                `Visit cultural venues or attend evening events`
+              ];
+            } else {
+              defaultActivities = [
+                `Explore the historic center of ${city}`,
+                `Visit local museums and cultural sites`,
+                `Walk through parks and public spaces`,
+                `Browse local shops and markets`,
+                `Try local cafés and taste regional specialties`
+              ];
+            }
+          } else {
+            // Generic fallback for any weather
+            if (isNight || isEvening) {
+              defaultActivities = [
+                `Discover ${city}'s evening dining scene`,
+                `Take a nighttime walk through the city center`,
+                `Visit local bars or entertainment venues`,
+                `Explore illuminated landmarks and buildings`,
+                `Enjoy live music or cultural performances`
+              ];
+            } else {
+              defaultActivities = [
+                `Explore the main attractions of ${city}`,
+                `Visit local museums and cultural sites`,
+                `Try regional food at recommended restaurants`,
+                `Walk through the city's historic areas`,
+                `Browse local shops and markets`
+              ];
+            }
+          }
+          
+          console.log('Generated default activities:', defaultActivities);
+          setActivities(defaultActivities);
+        } else {
+          setActivities(acts);
+        }
       }
     } catch (err) {
       setMessages(msgs => [
