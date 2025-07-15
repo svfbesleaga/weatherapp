@@ -52,6 +52,7 @@ function App() {
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [activities, setActivities] = useState([]);
   const [messages, setMessages] = useState([]);
+  const [isGeneratingActivities, setIsGeneratingActivities] = useState(false);
 
   // Determine weather status and time of day
   const weatherStatus = extractWeatherStatusFromWeatherInfo(weatherInfo);
@@ -91,13 +92,14 @@ function App() {
       transition: 'background 1s',
     }}>
       <WeatherWidget weatherInfo={weatherInfo} timeOfDay={tod} />
-      <ActivityWidget activities={activities} />
+      <ActivityWidget activities={activities} isGenerating={isGeneratingActivities} />
       <div style={{ position: 'fixed', right: '2.5rem', bottom: '2.5rem', zIndex: 100 }}>
         <Chatbot
           messages={messages}
           setMessages={setMessages}
           setWeatherInfo={setWeatherInfo}
           setActivities={setActivities}
+          setIsGeneratingActivities={setIsGeneratingActivities}
           timeOfDay={tod}
         />
       </div>

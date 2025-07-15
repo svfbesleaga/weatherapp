@@ -31,7 +31,7 @@ async function fetchWeather(city) {
   };
 }
 
-function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfDay }) {
+function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGeneratingActivities, timeOfDay }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -55,6 +55,12 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
     }
     setInput('');
     setLoading(true);
+    
+    // Clear old activities first
+    if (setActivities) {
+      setActivities([]);
+    }
+    
     let weatherInfo = null;
     let city = input.trim();
     try {
@@ -67,6 +73,12 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       }
       setWeatherInfo(weatherInfo);
       setMessages([...messages, { sender: 'user', text: input }, { sender: 'bot', text: `Weather in ${weatherInfo.city}: ${weatherInfo.temp}°C, ${weatherInfo.desc}.` }]);
+      
+      // Start generating activities (show loading state)
+      if (setIsGeneratingActivities) {
+        setIsGeneratingActivities(true);
+      }
+      
     } catch (e) {
       setWeatherInfo(null);
       setMessages([...messages, { sender: 'user', text: input }, { sender: 'bot', text: 'City not found. Please enter a valid city name.' }]);
@@ -232,12 +244,22 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
         } else {
           setActivities(acts);
         }
+        
+        // Stop generating activities loading state
+        if (setIsGeneratingActivities) {
+          setIsGeneratingActivities(false);
+        }
       }
     } catch (err) {
       setMessages(msgs => [
         ...msgs,
         { sender: 'bot', text: 'Error: Could not reach OpenAI.' }
       ]);
+      
+      // Stop generating activities loading state on error
+      if (setIsGeneratingActivities) {
+        setIsGeneratingActivities(false);
+      }
     }
     setLoading(false);
   };
