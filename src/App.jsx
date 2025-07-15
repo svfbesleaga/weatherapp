@@ -17,26 +17,41 @@ function extractWeatherStatusFromWeatherInfo(weatherInfo) {
 
 function getTimeOfDay(weatherInfo) {
   if (!weatherInfo || !weatherInfo.sunrise || !weatherInfo.sunset || typeof weatherInfo.timezone !== 'number') {
+    // Fallback to local time if weather data is incomplete
     const hour = new Date().getHours();
     if (hour >= 6 && hour < 18) return 'day';
     if (hour >= 18 && hour < 21) return 'evening';
     return 'night';
   }
+  
+  // Get current time in UTC seconds
   const nowUTC = Math.floor(Date.now() / 1000);
+  
+  // Add timezone offset to get local time in the city
   const localNow = nowUTC + weatherInfo.timezone;
-  if (localNow >= weatherInfo.sunrise && localNow < weatherInfo.sunset) {
-    if (localNow >= weatherInfo.sunset - 3600) return 'evening';
-    if (localNow <= weatherInfo.sunrise + 3600) return 'evening';
+  
+  // Check if current local time is between sunrise and sunset
+  if (localNow >= weatherInfo.sunrise && localNow <= weatherInfo.sunset) {
+    // During daylight hours
+    if (localNow >= weatherInfo.sunset - 3600) {
+      // Within 1 hour of sunset
+      return 'evening';
+    }
+    if (localNow <= weatherInfo.sunrise + 3600) {
+      // Within 1 hour of sunrise
+      return 'evening';
+    }
     return 'day';
+  } else {
+    // After sunset or before sunrise
+    return 'night';
   }
-  return 'night';
 }
 
 function App() {
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [activities, setActivities] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [timeOfDay, setTimeOfDay] = useState('day');
 
   // Determine weather status and time of day
   const weatherStatus = extractWeatherStatusFromWeatherInfo(weatherInfo);

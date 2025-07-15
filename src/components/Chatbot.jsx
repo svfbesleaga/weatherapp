@@ -84,7 +84,6 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       }
       systemPrompt += `\nBased on these conditions, suggest some suitable activities for the user. Be specific and creative, and explain why each activity fits the weather and time of day. If it is NIGHT, avoid suggesting activities that are not possible or safe at night (such as visiting parks or outdoor attractions that may be closed). Consider the user's location (${weatherInfo.city}), the weather, and the time of day (${timeOfDay.toUpperCase()}), and suggest activities that are relevant or unique to that city or region, not just generic weather-based suggestions. Output the activities as a numbered list, each on a new line.`;
     }
-    console.log(systemPrompt);
     // Call GPT with 5s longer timeout
     try {
       const fetchWithTimeout = (url, options, timeoutMs) => {
@@ -117,7 +116,6 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       );
       const data = await response.json();
       const reply = data.choices?.[0]?.message?.content || 'No response.';
-      console.log(reply);
       setMessages(msgs => [
         ...msgs,
         { sender: 'bot', text: "Suggesting some activities for you to do .. " }
@@ -125,11 +123,9 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
       // Extract activities from reply
       if (setActivities && weatherInfo) {
         const acts = (reply.match(/\d+\.\s+(.+?)(?=\n\d+\.|$)/gs) || []).map(s => s.replace(/^\d+\.\s+/, '').trim());
-        console.log(acts);
         
         // If no activities were extracted or list is empty, generate defaults
         if (!acts || acts.length === 0) {
-          console.log('No activities extracted from OpenAI, generating defaults...');
           const weather = weatherInfo.desc.toLowerCase();
           const temp = weatherInfo.temp;
           const city = weatherInfo.city;
@@ -233,7 +229,6 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
             }
           }
           
-          console.log('Generated default activities:', defaultActivities);
           setActivities(defaultActivities);
         } else {
           setActivities(acts);
