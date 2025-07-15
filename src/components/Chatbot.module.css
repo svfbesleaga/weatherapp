@@ -3,7 +3,8 @@
   flex-direction: column;
   height: 500px;
   width: 100%;
-  max-width: 400px;
+  min-width: 260px;
+  max-width: 320px;
   margin: 0 auto;
   background: rgba(255,255,255,0.0025);
   border-radius: 24px;
@@ -88,24 +89,66 @@
   right: 2.5rem;
   bottom: 2.5rem;
   z-index: 200;
-  background: rgba(255,255,255,0.7);
-  color: #646cff;
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
+  background: rgba(255,255,255,0.0025);
+  border: 1.5px solid rgba(255,255,255,0.18);
+  border-radius: 20px 20px 4px 20px;
+  width: 70px;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  box-shadow: none;
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
   cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
+
 .floatingChatBtn:hover {
   background: rgba(100,108,255,0.12);
-  color: #a259c6;
-  box-shadow: none;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(31,38,135,0.45);
+}
+
+.floatingChatBtn:hover .chatDots span {
+  background-color: white;
+}
+
+.chatDots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.chatDots span {
+  width: 6px;
+  height: 6px;
+  background-color: #646cff;
+  border-radius: 50%;
+  animation: chatDotBounce 1.4s ease-in-out infinite both;
+}
+
+.chatDots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.chatDots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+.chatDots span:nth-child(3) {
+  animation-delay: 0s;
+}
+
+@keyframes chatDotBounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
 }
 
 .minimizeBtn {

@@ -1,6 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './Chatbot.module.css';
-import { FaRegCommentDots } from 'react-icons/fa';
 
 const OPENAI_API_URL = import.meta.env.VITE_OPENAI_API_URL;
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
@@ -259,7 +258,11 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, timeOfD
         onClick={() => { setMinimized(false); setFirstOpen(false); }}
         aria-label="Open chat"
       >
-        <FaRegCommentDots size={32} />
+        <div className={styles.chatDots}>
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </button>
     );
   }

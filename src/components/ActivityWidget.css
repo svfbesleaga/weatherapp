@@ -110,9 +110,10 @@
   position: fixed;
   top: 27rem;
   left: 2.5rem;
-  width: 80vw;
-  min-width: 0;
-  max-width: 1200px;
+  right: calc(2.5rem + 320px + 2rem); /* Always leave space for chatbot (2.5rem margin + 320px width + 2rem buffer) */
+  width: auto;
+  min-width: 300px;
+  max-width: none;
   background: rgba(255,255,255,0.0032);
   box-shadow: none;
   backdrop-filter: blur(10px);
@@ -133,7 +134,25 @@
   box-sizing: border-box;
   word-break: break-word;
   overflow-wrap: break-word;
-  margin-right: 420px; /* Prevent overlap with Chatbot (400px + 2rem) */
+}
+
+/* Handle small screens where there's not enough space */
+@media (max-width: 768px) {
+  .activity-widget.activity-list-widget {
+    top: auto;
+    bottom: 8rem; /* Position above the chatbot button */
+    left: 1rem;
+    right: 1rem;
+    min-width: 0;
+  }
+}
+
+/* Handle medium screens */
+@media (max-width: 1024px) {
+  .activity-widget.activity-list-widget {
+    right: calc(1rem + 320px + 1rem); /* Smaller margins on medium screens */
+    left: 1rem;
+  }
 }
 .activity-titlebar {
   display: flex;
