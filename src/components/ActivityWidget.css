@@ -3,8 +3,7 @@
   min-width: 0;
   max-width: 340px;
   background: rgba(255,255,255,0.0032);
-  /* box-shadow: 0 8px 32px 0 rgba(31,38,135,0.25); */
-  box-shadow: none;
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -24,6 +23,10 @@
   align-items: flex-start;
   width: auto;
   min-height: 0;
+  transition: box-shadow 0.3s;
+}
+.activity-widget:hover {
+  box-shadow: 0 12px 40px 0 rgba(31,38,135,0.45);
 }
 .activity-titlebar {
   display: flex;
@@ -112,7 +115,7 @@
   min-width: 300px;
   max-width: none;
   background: rgba(255,255,255,0.0032);
-  box-shadow: none;
+  box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 20px;
@@ -131,6 +134,10 @@
   box-sizing: border-box;
   word-break: break-word;
   overflow-wrap: break-word;
+  transition: box-shadow 0.3s;
+}
+.activity-widget.activity-list-widget:hover {
+  box-shadow: 0 12px 40px 0 rgba(31,38,135,0.45);
 }
 
 /* Handle small screens where there's not enough space */
