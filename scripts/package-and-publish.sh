@@ -164,8 +164,11 @@ create_git_tag() {
 build_docker_image() {
     log_info "Building Docker image: $IMAGE_NAME:$VERSION"
     
-    # Build with both version tag and latest
-    docker build \
+    # Build with both version tag and latest for x86_64 platform
+    # Note: --platform linux/amd64 ensures compatibility with AWS App Runner and most cloud platforms
+    # Requires Docker BuildKit (enabled by default in Docker 23.0+) or buildx for cross-platform builds
+    DOCKER_BUILDKIT=1 docker build \
+        --platform linux/amd64 \
         -t "$IMAGE_NAME:$VERSION" \
         -t "$IMAGE_NAME:latest" \
         -f "$DOCKERFILE_PATH" \

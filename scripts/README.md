@@ -9,7 +9,7 @@ A comprehensive release automation script that handles the complete CI/CD pipeli
 ### What it does:
 
 1. **🏷️ Git Tagging**: Creates and pushes a new Git tag with semantic versioning
-2. **🐳 Docker Build**: Builds a production Docker image with the version tag
+2. **🐳 Docker Build**: Builds a production Docker image with the version tag (x86_64/amd64 platform for cloud compatibility)
 3. **☁️ ECR Management**: Creates AWS ECR repository if it doesn't exist
 4. **🚀 Image Publishing**: Pushes the Docker image to AWS ECR
 
@@ -210,6 +210,7 @@ git push origin --delete v1.0.0
 - ✅ **AWS credential validation**
 - ✅ **ECR repository auto-creation** with security settings
 - ✅ **Image lifecycle management** (keeps last 10 images)
+- ✅ **Platform compatibility** (builds x86_64/amd64 images for cloud deployment)
 - ✅ **Colorized output** for better readability
 - ✅ **Error handling** with meaningful messages
 - ✅ **Rollback safety** (checks for existing tags)
