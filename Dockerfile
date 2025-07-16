@@ -33,7 +33,8 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/server.cjs ./
 COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
 
-# Install only production dependencies for the server
+# Set production environment and install only production dependencies
+ENV NODE_ENV=production
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy runtime environment injection script

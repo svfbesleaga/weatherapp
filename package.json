@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "node server.cjs",
-    "prepare": "husky"
+    "prepare": "node -e \"if (process.env.NODE_ENV !== 'production') { try { require('husky').install() } catch (e) { console.log('Husky not available, skipping...') } }\""
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": [
