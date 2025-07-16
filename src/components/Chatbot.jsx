@@ -304,9 +304,9 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
         className={styles.minimizeBtn}
         onClick={() => setMinimized(true)}
         aria-label="Minimize chat"
-        style={{ position: 'absolute', top: 8, right: 8, zIndex: 101 }}
+        style={{ position: 'absolute', top: 12, right: 12, zIndex: 101 }}
       >
-        –
+        ×
       </button>
       <div className={styles.messagesArea}>
         {firstOpen && (
