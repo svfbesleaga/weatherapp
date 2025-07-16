@@ -349,20 +349,35 @@ aws secretsmanager update-secret \
 
 ### Usage:
 
-#### Basic Deployment:
+#### Interactive Mode (Recommended):
 ```bash
-./scripts/deploy-version.sh <ENVIRONMENT> <VERSION>
+./scripts/deploy-version.sh
+```
+
+The script will prompt you to:
+1. Select target environment (develop, qa, prod)
+2. Choose version to deploy (with latest tag as default)
+
+#### Semi-Interactive Mode:
+```bash
+# Specify environment, choose version interactively
+./scripts/deploy-version.sh develop
+
+# Specify both environment and version
+./scripts/deploy-version.sh develop v1.2.3
 ```
 
 #### Examples:
 ```bash
-# Deploy v1.2.3 to development
+# Full interactive mode
+./scripts/deploy-version.sh
+
+# Interactive version selection for develop environment
+./scripts/deploy-version.sh develop
+
+# Direct deployment (no prompts)
 ./scripts/deploy-version.sh develop v1.2.3
-
-# Deploy v2.0.0 to QA
 ./scripts/deploy-version.sh qa v2.0.0
-
-# Deploy v1.5.2 to production
 ./scripts/deploy-version.sh prod v1.5.2
 
 # Get help
@@ -427,16 +442,35 @@ aws secretsmanager create-secret \
   --secret-string '{"VITE_OPENAI_API_KEY":"sk-...","VITE_WEATHER_API_KEY":"..."}' \
   --region eu-west-1
 
-# 3. Deploy to development
-./scripts/deploy-version.sh develop v1.2.3
+# 3. Deploy to development (interactive mode)
+./scripts/deploy-version.sh
 
 # Output:
 # ╔══════════════════════════════════════════════╗
 # ║        Weather App - Deployment Tool         ║
 # ╚══════════════════════════════════════════════╝
 #
-# [INFO] Environment: develop
-# [INFO] Version: v1.2.3
+# [INFO] Select target environment:
+# 1) develop  - Development environment
+# 2) qa       - Quality Assurance environment
+# 3) prod     - Production environment
+#
+# Enter choice (1-3): 1
+# [INFO] Selected environment: develop
+#
+# [INFO] Fetching available versions...
+#
+# [INFO] Recent available versions:
+#   v1.2.3 v1.2.2 v1.2.1 v1.2.0 v1.1.0 v1.0.0
+#
+# [INFO] Latest version: v1.2.3
+#
+# Enter version to deploy (default: v1.2.3): 
+# [INFO] Selected version: v1.2.3
+#
+# [INFO] Deployment Configuration:
+#   - Environment: develop
+#   - Version: v1.2.3
 # 
 # ╔════════════════════════════════════════════════════════════════╗
 # ║                         IMPORTANT NOTE                         ║

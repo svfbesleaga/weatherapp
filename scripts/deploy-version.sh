@@ -44,9 +44,9 @@ log_note() {
 
 # Print usage
 usage() {
-    echo "Usage: $0 <ENVIRONMENT> <VERSION>"
+    echo "Usage: $0 [ENVIRONMENT] [VERSION]"
     echo
-    echo "Parameters:"
+    echo "Parameters (optional - will prompt if not provided):"
     echo "  ENVIRONMENT    Target environment (develop, qa, prod)"
     echo "  VERSION        Version tag to deploy (e.g., v1.2.3)"
     echo
@@ -55,6 +55,8 @@ usage() {
     echo "  ECR_REPOSITORY_NAME     ECR repository name (default: weatherapp)"
     echo
     echo "Examples:"
+    echo "  $0                      # Interactive mode (recommended)"
+    echo "  $0 develop              # Interactive version selection for develop"
     echo "  $0 develop v1.2.3       # Deploy v1.2.3 to develop environment"
     echo "  $0 qa v2.0.0            # Deploy v2.0.0 to QA environment"
     echo "  $0 prod v1.5.2          # Deploy v1.5.2 to production"
@@ -67,33 +69,117 @@ usage() {
     echo
 }
 
+# Interactive environment selection
+select_environment() {
+    if [ -n "${1:-}" ]; then
+        ENVIRONMENT="$1"
+        # Validate provided environment
+        if [[ ! " ${VALID_ENVIRONMENTS[@]} " =~ " ${ENVIRONMENT} " ]]; then
+            log_error "Invalid environment: $ENVIRONMENT"
+            log_error "Valid environments: ${VALID_ENVIRONMENTS[*]}"
+            exit 1
+        fi
+        log_info "Using provided environment: $ENVIRONMENT"
+    else
+        echo
+        log_info "Select target environment:"
+        echo "1) develop  - Development environment"
+        echo "2) qa       - Quality Assurance environment" 
+        echo "3) prod     - Production environment"
+        echo
+        
+        while true; do
+            read -p "Enter choice (1-3): " choice
+            case $choice in
+                1) ENVIRONMENT="develop"; break ;;
+                2) ENVIRONMENT="qa"; break ;;
+                3) ENVIRONMENT="prod"; break ;;
+                *) log_error "Invalid choice. Please enter 1, 2, or 3." ;;
+            esac
+        done
+        
+        log_info "Selected environment: $ENVIRONMENT"
+    fi
+}
+
+# Interactive version selection
+select_version() {
+    if [ -n "${1:-}" ]; then
+        VERSION="$1"
+        # Validate provided version format
+        if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            log_error "Invalid version format: $VERSION"
+            log_error "Version must be in format vX.Y.Z (e.g., v1.2.3)"
+            exit 1
+        fi
+        log_info "Using provided version: $VERSION"
+    else
+        echo
+        log_info "Fetching available versions..."
+        
+        # Fetch latest tags from remote
+        git fetch --tags >/dev/null 2>&1 || true
+        
+        # Get the latest tag as default
+        latest_tag=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+        
+        # Get last 10 tags for display
+        available_tags=$(git tag -l --sort=-version:refname | head -10 | tr '\n' ' ')
+        
+        echo
+        log_info "Recent available versions:"
+        if [ -n "$available_tags" ]; then
+            echo "  $available_tags"
+        else
+            echo "  No tags found"
+        fi
+        echo
+        log_info "Latest version: $latest_tag"
+        echo
+        
+        while true; do
+            read -p "Enter version to deploy (default: $latest_tag): " input_version
+            
+            # Use default if no input provided
+            if [ -z "$input_version" ]; then
+                VERSION="$latest_tag"
+            else
+                VERSION="$input_version"
+            fi
+            
+            # Validate version format
+            if [[ $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                break
+            else
+                log_error "Invalid version format: $VERSION"
+                log_error "Version must be in format vX.Y.Z (e.g., v1.2.3)"
+                echo
+            fi
+        done
+        
+        log_info "Selected version: $VERSION"
+    fi
+}
+
 # Validate input parameters
 validate_parameters() {
-    if [ $# -ne 2 ]; then
-        log_error "Invalid number of arguments."
+    # Check if too many arguments provided
+    if [ $# -gt 2 ]; then
+        log_error "Too many arguments provided."
         usage
         exit 1
     fi
     
-    ENVIRONMENT="$1"
-    VERSION="$2"
+    # Interactive environment selection
+    select_environment "${1:-}"
     
-    # Validate environment
-    if [[ ! " ${VALID_ENVIRONMENTS[@]} " =~ " ${ENVIRONMENT} " ]]; then
-        log_error "Invalid environment: $ENVIRONMENT"
-        log_error "Valid environments: ${VALID_ENVIRONMENTS[*]}"
-        exit 1
-    fi
+    # Interactive version selection  
+    select_version "${2:-}"
     
-    # Validate version format
-    if [[ ! $VERSION =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        log_error "Invalid version format: $VERSION"
-        log_error "Version must be in format vX.Y.Z (e.g., v1.2.3)"
-        exit 1
-    fi
-    
-    log_info "Environment: $ENVIRONMENT"
-    log_info "Version: $VERSION"
+    echo
+    log_info "Deployment Configuration:"
+    echo "  - Environment: $ENVIRONMENT"
+    echo "  - Version: $VERSION"
 }
 
 # Check required tools and permissions
@@ -496,15 +582,13 @@ main() {
         exit 0
     fi
     
-    # Validate parameters
+    # Validate parameters and get user input
     validate_parameters "$@"
     
-    log_info "Configuration:"
+    echo
+    log_info "AWS Configuration:"
     echo "  - AWS Region: $AWS_REGION"
     echo "  - ECR Repository: $ECR_REPOSITORY_NAME"
-    echo "  - Environment: $ENVIRONMENT"
-    echo "  - Version: $VERSION"
-    echo
     
     # Important note about secrets
     echo -e "${PURPLE}╔════════════════════════════════════════════════════════════════╗${NC}"
