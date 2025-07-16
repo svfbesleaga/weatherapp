@@ -531,6 +531,76 @@ aws secretsmanager create-secret \
 #   - Consider setting up custom domain and SSL certificate
 ```
 
+### Required AWS IAM Permissions:
+
+The deployment script requires the following AWS IAM permissions:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "apprunner:CreateService",
+                "apprunner:UpdateService",
+                "apprunner:DescribeService",
+                "apprunner:ListServices",
+                "apprunner:TagResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "ecr:DescribeRepositories",
+                "ecr:DescribeImages"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:DescribeSecret"
+            ],
+            "Resource": "arn:aws:secretsmanager:*:*:secret:/secrets/*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:GetRole",
+                "iam:PutRolePolicy",
+                "iam:AttachRolePolicy",
+                "iam:PassRole"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:role/AppRunnerInstanceRole-weatherapp-*",
+                "arn:aws:iam::*:role/AppRunnerAccessRole-weatherapp-*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "sts:GetCallerIdentity"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+**Note**: The script automatically creates two types of environment-specific IAM roles:
+- **Access Role** (e.g., `AppRunnerAccessRole-weatherapp-develop`) - For App Runner to access ECR registry
+- **Instance Role** (e.g., `AppRunnerInstanceRole-weatherapp-develop`) - For App Runner instances to access Secrets Manager
+
+These roles are required for private ECR access and runtime environment secrets, providing security isolation between environments.
+
 ### Troubleshooting:
 
 #### Version Not Found in Git

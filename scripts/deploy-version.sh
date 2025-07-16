@@ -42,6 +42,149 @@ log_note() {
     echo -e "${PURPLE}[NOTE]${NC} $1"
 }
 
+# Create or get App Runner access IAM role (for ECR access)
+create_or_get_access_role() {
+    ACCESS_ROLE_NAME="AppRunnerAccessRole-${APP_NAME}-${ENVIRONMENT}"
+    
+    log_info "Checking for App Runner access IAM role: $ACCESS_ROLE_NAME"
+    
+    # Check if role exists
+    if aws iam get-role --role-name "$ACCESS_ROLE_NAME" >/dev/null 2>&1; then
+        log_success "Access IAM role already exists: $ACCESS_ROLE_NAME"
+    else
+        log_info "Creating App Runner access IAM role: $ACCESS_ROLE_NAME"
+        
+        # Create trust policy for App Runner
+        local trust_policy="/tmp/apprunner-access-trust-policy.json"
+        cat > "$trust_policy" << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "build.apprunner.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+        
+        # Create the role
+        aws iam create-role \
+            --role-name "$ACCESS_ROLE_NAME" \
+            --assume-role-policy-document "file://$trust_policy" \
+            --description "IAM role for App Runner to access ECR registry" \
+            --region "$AWS_REGION" >/dev/null
+        
+        # Attach AWS managed policy for ECR access
+        aws iam attach-role-policy \
+            --role-name "$ACCESS_ROLE_NAME" \
+            --policy-arn "arn:aws:iam::aws:policy/service-role/AWSAppRunnerServicePolicyForECRAccess" \
+            --region "$AWS_REGION"
+        
+        # Wait for role to be available
+        log_info "Waiting for access IAM role to be available..."
+        sleep 10
+        
+        # Clean up temporary files
+        rm -f "$trust_policy"
+        
+        log_success "Access IAM role created successfully: $ACCESS_ROLE_NAME"
+    fi
+    
+    # Get role ARN
+    ACCESS_ROLE_ARN=$(aws iam get-role \
+        --role-name "$ACCESS_ROLE_NAME" \
+        --region "$AWS_REGION" \
+        --query 'Role.Arn' \
+        --output text)
+    
+    log_info "Access role ARN: $ACCESS_ROLE_ARN"
+}
+
+# Create or get App Runner instance IAM role
+create_or_get_instance_role() {
+    INSTANCE_ROLE_NAME="AppRunnerInstanceRole-${APP_NAME}-${ENVIRONMENT}"
+    
+    log_info "Checking for App Runner instance IAM role: $INSTANCE_ROLE_NAME"
+    
+    # Check if role exists
+    if aws iam get-role --role-name "$INSTANCE_ROLE_NAME" >/dev/null 2>&1; then
+        log_success "IAM role already exists: $INSTANCE_ROLE_NAME"
+    else
+        log_info "Creating App Runner instance IAM role: $INSTANCE_ROLE_NAME"
+        
+        # Create trust policy for App Runner
+        local trust_policy="/tmp/apprunner-trust-policy.json"
+        cat > "$trust_policy" << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "tasks.apprunner.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+EOF
+        
+        # Create the role
+        aws iam create-role \
+            --role-name "$INSTANCE_ROLE_NAME" \
+            --assume-role-policy-document "file://$trust_policy" \
+            --description "IAM role for App Runner service instances to access Secrets Manager" \
+            --region "$AWS_REGION" >/dev/null
+        
+        # Create policy for Secrets Manager access
+        local policy_document="/tmp/apprunner-policy.json"
+        cat > "$policy_document" << EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+      ],
+      "Resource": "arn:aws:secretsmanager:${AWS_REGION}:${AWS_ACCOUNT_ID}:secret:/secrets/*"
+    }
+  ]
+}
+EOF
+        
+        # Attach policy to role
+        aws iam put-role-policy \
+            --role-name "$INSTANCE_ROLE_NAME" \
+            --policy-name "SecretsManagerAccess" \
+            --policy-document "file://$policy_document" \
+            --region "$AWS_REGION"
+        
+        # Wait for role to be available
+        log_info "Waiting for IAM role to be available..."
+        sleep 10
+        
+        # Clean up temporary files
+        rm -f "$trust_policy" "$policy_document"
+        
+        log_success "IAM role created successfully: $INSTANCE_ROLE_NAME"
+    fi
+    
+    # Get role ARN
+    INSTANCE_ROLE_ARN=$(aws iam get-role \
+        --role-name "$INSTANCE_ROLE_NAME" \
+        --region "$AWS_REGION" \
+        --query 'Role.Arn' \
+        --output text)
+    
+    log_info "Instance role ARN: $INSTANCE_ROLE_ARN"
+}
+
 # Print usage
 usage() {
     echo "Usage: $0 [ENVIRONMENT] [VERSION]"
@@ -282,7 +425,8 @@ check_secrets_manager() {
     SECRET_NAME="/secrets/${ENVIRONMENT}-weatherapp"
     log_info "Checking Secrets Manager secret: $SECRET_NAME"
     
-    if ! aws secretsmanager describe-secret --secret-id "$SECRET_NAME" --region "$AWS_REGION" >/dev/null 2>&1; then
+    # Get the actual secret ARN for App Runner (includes the 6-character suffix)
+    if ! SECRET_ARN=$(aws secretsmanager describe-secret --secret-id "$SECRET_NAME" --region "$AWS_REGION" --query 'ARN' --output text 2>/dev/null); then
         log_error "Secret '$SECRET_NAME' not found in AWS Secrets Manager."
         echo
         log_note "📝 IMPORTANT: You need to manually create the secret before deployment!"
@@ -304,6 +448,7 @@ check_secrets_manager() {
     fi
     
     log_success "Secret '$SECRET_NAME' exists and is accessible."
+    log_info "Secret ARN: $SECRET_ARN"
 }
 
 # Generate App Runner service name
@@ -327,10 +472,10 @@ create_apprunner_config() {
       "ImageConfiguration": {
         "Port": "8080",
         "RuntimeEnvironmentSecrets": {
-          "VITE_OPENAI_API_KEY": "${SECRET_NAME}:VITE_OPENAI_API_KEY",
-          "VITE_WEATHER_API_KEY": "${SECRET_NAME}:VITE_WEATHER_API_KEY",
-          "VITE_OPENAI_API_URL": "${SECRET_NAME}:VITE_OPENAI_API_URL",
-          "VITE_WEATHER_API_URL": "${SECRET_NAME}:VITE_WEATHER_API_URL"
+          "VITE_OPENAI_API_KEY": "${SECRET_ARN}:VITE_OPENAI_API_KEY",
+          "VITE_WEATHER_API_KEY": "${SECRET_ARN}:VITE_WEATHER_API_KEY",
+          "VITE_OPENAI_API_URL": "${SECRET_ARN}:VITE_OPENAI_API_URL",
+          "VITE_WEATHER_API_URL": "${SECRET_ARN}:VITE_WEATHER_API_URL"
         },
         "RuntimeEnvironmentVariables": {
           "NODE_ENV": "production",
@@ -339,11 +484,15 @@ create_apprunner_config() {
       },
       "ImageRepositoryType": "ECR"
     },
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "$ACCESS_ROLE_ARN"
+    },
     "AutoDeploymentsEnabled": false
   },
   "InstanceConfiguration": {
     "Cpu": "0.25 vCPU",
-    "Memory": "0.5 GB"
+    "Memory": "0.5 GB",
+    "InstanceRoleArn": "$INSTANCE_ROLE_ARN"
   },
   "HealthCheckConfiguration": {
     "Protocol": "HTTP",
@@ -425,17 +574,23 @@ update_service() {
       "ImageConfiguration": {
         "Port": "8080",
         "RuntimeEnvironmentSecrets": {
-          "VITE_OPENAI_API_KEY": "${SECRET_NAME}:VITE_OPENAI_API_KEY",
-          "VITE_WEATHER_API_KEY": "${SECRET_NAME}:VITE_WEATHER_API_KEY",
-          "VITE_OPENAI_API_URL": "${SECRET_NAME}:VITE_OPENAI_API_URL",
-          "VITE_WEATHER_API_URL": "${SECRET_NAME}:VITE_WEATHER_API_URL"
+          "VITE_OPENAI_API_KEY": "${SECRET_ARN}:VITE_OPENAI_API_KEY",
+          "VITE_WEATHER_API_KEY": "${SECRET_ARN}:VITE_WEATHER_API_KEY",
+          "VITE_OPENAI_API_URL": "${SECRET_ARN}:VITE_OPENAI_API_URL",
+          "VITE_WEATHER_API_URL": "${SECRET_ARN}:VITE_WEATHER_API_URL"
         },
         "RuntimeEnvironmentVariables": {
           "NODE_ENV": "production",
           "PORT": "8080"
         }
       }
+    },
+    "AuthenticationConfiguration": {
+      "AccessRoleArn": "$ACCESS_ROLE_ARN"
     }
+  },
+  "InstanceConfiguration": {
+    "InstanceRoleArn": "$INSTANCE_ROLE_ARN"
   }
 }
 EOF
@@ -617,6 +772,8 @@ main() {
     validate_ecr_image
     check_secrets_manager
     get_service_name
+    create_or_get_access_role
+    create_or_get_instance_role
     
     echo
     log_warning "Ready to deploy $VERSION to $ENVIRONMENT environment."
