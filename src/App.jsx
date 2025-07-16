@@ -1,8 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WeatherWidget from './components/WeatherWidget';
 import ActivityWidget from './components/ActivityWidget';
 import Chatbot from './components/Chatbot';
 import './App.css';
+
+// Preload all background images to prevent blank screen transitions
+function preloadBackgroundImages() {
+  const imageFiles = [
+    '/ai-bg-default.png',
+    '/ai-bg-sunny.png',
+    '/ai-bg-sunny-day.png',
+    '/ai-bg-sunny-night.png',
+    '/ai-bg-rain.png',
+    '/ai-bg-rain-day.png',
+    '/ai-bg-rain-night.png',
+    '/ai-bg-cloudy.png',
+    '/ai-bg-cloudy-day.png',
+    '/ai-bg-cloudy-night.png',
+    '/ai-bg-snow.png',
+    '/ai-bg-snow-day.png',
+    '/ai-bg-snow-evening.png',
+    '/ai-bg-storm.png',
+    '/ai-bg-storm-day.png'
+  ];
+
+  imageFiles.forEach(imagePath => {
+    const img = new Image();
+    img.src = imagePath;
+    // Preload silently - only log errors in development
+    if (import.meta.env.DEV) {
+      img.onload = () => console.log(`✅ Preloaded: ${imagePath}`);
+      img.onerror = () => console.warn(`❌ Failed to preload: ${imagePath}`);
+    }
+  });
+}
 
 function extractWeatherStatusFromWeatherInfo(weatherInfo) {
   if (!weatherInfo || !weatherInfo.desc) return 'default';
@@ -54,6 +85,11 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [isGeneratingActivities, setIsGeneratingActivities] = useState(false);
 
+  // Preload background images on component mount
+  useEffect(() => {
+    preloadBackgroundImages();
+  }, []);
+
   // Determine weather status and time of day
   const weatherStatus = extractWeatherStatusFromWeatherInfo(weatherInfo);
   const tod = getTimeOfDay(weatherInfo);
@@ -82,14 +118,6 @@ function App() {
   return (
     <div className="homepage-container" style={{
       backgroundImage: `url(${bgImage})`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat',
-      minHeight: '100vh',
-      minWidth: '100vw',
-      width: '100vw',
-      height: '100vh',
-      transition: 'background 1s',
     }}>
       <WeatherWidget weatherInfo={weatherInfo} timeOfDay={tod} />
       <ActivityWidget activities={activities} isGenerating={isGeneratingActivities} />
