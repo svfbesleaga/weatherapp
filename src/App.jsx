@@ -84,6 +84,7 @@ function App() {
   const [activities, setActivities] = useState([]);
   const [messages, setMessages] = useState([]);
   const [isGeneratingActivities, setIsGeneratingActivities] = useState(false);
+  const [showActivityWidget, setShowActivityWidget] = useState(true);
 
   // Preload background images on component mount
   useEffect(() => {
@@ -120,7 +121,13 @@ function App() {
       backgroundImage: `url(${bgImage})`,
     }}>
       <WeatherWidget weatherInfo={weatherInfo} timeOfDay={tod} />
-      <ActivityWidget activities={activities} isGenerating={isGeneratingActivities} />
+      {showActivityWidget && (
+        <ActivityWidget 
+          activities={activities} 
+          isGenerating={isGeneratingActivities}
+          onClose={() => setShowActivityWidget(false)}
+        />
+      )}
       <div style={{ position: 'fixed', right: '2.5rem', bottom: '2.5rem', zIndex: 100 }}>
         <Chatbot
           messages={messages}
@@ -128,6 +135,7 @@ function App() {
           setWeatherInfo={setWeatherInfo}
           setActivities={setActivities}
           setIsGeneratingActivities={setIsGeneratingActivities}
+          resetActivityWidget={() => setShowActivityWidget(true)}
           timeOfDay={tod}
         />
       </div>

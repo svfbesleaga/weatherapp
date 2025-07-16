@@ -1,7 +1,7 @@
 import React from 'react';
 import './ActivityWidget.css';
 
-export default function ActivityWidget({ activities, isGenerating }) {
+export default function ActivityWidget({ activities, isGenerating, onClose }) {
   // Show loading state when generating activities
   if (isGenerating) {
     return (
@@ -9,6 +9,11 @@ export default function ActivityWidget({ activities, isGenerating }) {
         <div className="activity-titlebar">
           <span role="img" aria-label="activity" className="activity-emoji">💡</span>
           <span className="activity-title">Suggested Activities</span>
+          {onClose && (
+            <button className="activity-close" onClick={onClose} aria-label="Close activity widget">
+              ×
+            </button>
+          )}
         </div>
         <div className="activity-loading">
           <span className="activity-loading-text">Generating Activities</span>
@@ -30,6 +35,11 @@ export default function ActivityWidget({ activities, isGenerating }) {
       <div className="activity-titlebar">
         <span role="img" aria-label="activity" className="activity-emoji">💡</span>
         <span className="activity-title">Suggested Activities</span>
+        {onClose && (
+          <button className="activity-close" onClick={onClose} aria-label="Close activity widget">
+            ×
+          </button>
+        )}
       </div>
       <ul className="activity-list">
         {activities.map((act, i) => (

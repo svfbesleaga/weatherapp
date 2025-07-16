@@ -40,7 +40,7 @@ async function fetchWeather(city) {
   };
 }
 
-function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGeneratingActivities, timeOfDay }) {
+function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGeneratingActivities, resetActivityWidget, timeOfDay }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -65,7 +65,10 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
     setInput('');
     setLoading(true);
     
-    // Clear old activities first
+    // Reset activity widget visibility and clear old activities
+    if (resetActivityWidget) {
+      resetActivityWidget();
+    }
     if (setActivities) {
       setActivities([]);
     }

@@ -78,7 +78,8 @@
   border: none;
   font-size: 1.2rem;
   color: #888;
-  margin-left: 0.5rem;
+  margin-left: auto;
+  margin-right: 1.3rem;
   cursor: pointer;
   border-radius: 50%;
   width: 2rem;
