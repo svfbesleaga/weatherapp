@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration - can be overridden by environment variables
-AWS_REGION="${AWS_REGION:-eu-west-2}"
+AWS_REGION="${AWS_REGION:-eu-west-1}"
 ECR_REPOSITORY_NAME="${ECR_REPOSITORY_NAME:-weatherapp}"
 IMAGE_NAME="${IMAGE_NAME:-weatherapp}"
 DOCKERFILE_PATH="${DOCKERFILE_PATH:-./Dockerfile}"
