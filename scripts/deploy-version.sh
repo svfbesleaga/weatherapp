@@ -571,13 +571,14 @@ update_service() {
   "SourceConfiguration": {
     "ImageRepository": {
       "ImageIdentifier": "$ECR_IMAGE_URI",
+      "ImageRepositoryType": "ECR",
       "ImageConfiguration": {
         "Port": "8080",
         "RuntimeEnvironmentSecrets": {
-          "VITE_OPENAI_API_KEY": "${SECRET_ARN}:VITE_OPENAI_API_KEY",
-          "VITE_WEATHER_API_KEY": "${SECRET_ARN}:VITE_WEATHER_API_KEY",
-          "VITE_OPENAI_API_URL": "${SECRET_ARN}:VITE_OPENAI_API_URL",
-          "VITE_WEATHER_API_URL": "${SECRET_ARN}:VITE_WEATHER_API_URL"
+          "VITE_OPENAI_API_KEY": "${SECRET_ARN}:VITE_OPENAI_API_KEY::",
+          "VITE_WEATHER_API_KEY": "${SECRET_ARN}:VITE_WEATHER_API_KEY::",
+          "VITE_OPENAI_API_URL": "${SECRET_ARN}:VITE_OPENAI_API_URL::",
+          "VITE_WEATHER_API_URL": "${SECRET_ARN}:VITE_WEATHER_API_URL::"
         },
         "RuntimeEnvironmentVariables": {
           "NODE_ENV": "production",
