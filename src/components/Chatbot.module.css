@@ -1,7 +1,7 @@
 .chatbotContainer {
   display: flex;
   flex-direction: column;
-  height: 500px;
+  height: 25rem;
   width: 100%;
   min-width: 260px;
   max-width: 320px;
@@ -168,4 +168,58 @@
 .minimizeBtn:hover {
   background: #e0eafc88;
   color: #c00;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .chatbotContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    max-height: 120px;
+    width: 100%;
+    max-width: none;
+    min-width: 100%;
+    margin: 0;
+    border-radius: 8px 8px 0 0;
+    z-index: 300;
+  }
+
+  .messagesArea {
+    display: none; /* Hide chat history on mobile */
+  }
+
+  .inputArea {
+    padding: 16px;
+    border-top: none;
+    background: rgba(255,255,255,0.0025);
+  }
+
+  .inputArea input {
+    padding: 12px 16px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    margin-right: 12px;
+  }
+
+  .inputArea button {
+    padding: 12px 20px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+    min-width: 70px;
+  }
+
+  .minimizeBtn {
+    top: 8px;
+    right: 8px;
+  }
+
+  .floatingChatBtn {
+    right: 1rem;
+    bottom: 1rem;
+    width: 60px;
+    height: 45px;
+  }
 } 

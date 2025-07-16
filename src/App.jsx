@@ -128,7 +128,7 @@ function App() {
           onClose={() => setShowActivityWidget(false)}
         />
       )}
-      <div style={{ position: 'fixed', right: '2.5rem', bottom: '2.5rem', zIndex: 100 }}>
+      <div className="chatbot-wrapper">
         <Chatbot
           messages={messages}
           setMessages={setMessages}

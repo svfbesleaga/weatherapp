@@ -109,7 +109,7 @@
 }
 .activity-widget.activity-list-widget {
   position: fixed;
-  top: 27rem;
+  top: 20rem;
   left: 2.5rem;
   right: calc(2.5rem + 320px + 2rem); /* Always leave space for chatbot (2.5rem margin + 320px width + 2rem buffer) */
   width: auto;
@@ -142,23 +142,68 @@
 }
 
 /* Handle small screens where there's not enough space */
-@media (max-width: 768px) {
-  .activity-widget.activity-list-widget {
-    top: auto;
-    bottom: 8rem; /* Position above the chatbot button */
-    left: 1rem;
-    right: 1rem;
-    min-width: 0;
+  @media (max-width: 768px) {
+    .activity-widget,
+    .activity-widget.activity-list-widget {
+      position: fixed;
+      top: 13rem; /* Below weather widget */
+      left: 0;
+      right: 0;
+      bottom: 5rem; /* Stick to chatbot widget */
+      width: 100vw; /* Full viewport width */
+      max-width: 100vw;
+      min-width: 100vw;
+      margin: 0;
+      padding: 1.2rem 1.5rem;
+      border-radius: 8px 8px 8px 8px; /* Rounded bottom corners only */
+      z-index: 250; /* Between weather and chatbot */
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+  .activity-widget-title {
+    flex-shrink: 0;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .activity-list {
+    flex: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+
+  .activity-list::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .activity-list::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .activity-list::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+
+  .activity-item {
+    padding: 1rem 0;
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+
+  .activity-widget .close-button {
+    width: 2rem;
+    height: 2rem;
+    font-size: 1.2rem;
+    margin-left: auto;
+    margin-right: 0;
   }
 }
 
-/* Handle medium screens */
-@media (max-width: 1024px) {
-  .activity-widget.activity-list-widget {
-    right: calc(1rem + 320px + 1rem); /* Smaller margins on medium screens */
-    left: 1rem;
-  }
-}
 .activity-titlebar {
   display: flex;
   align-items: center;

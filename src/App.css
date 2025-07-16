@@ -148,3 +148,20 @@ body, html, #root {
     background-position: 0% 50%;
   }
 }
+
+.chatbot-wrapper {
+  position: fixed;
+  right: 2.5rem;
+  bottom: 2.5rem;
+  z-index: 100;
+}
+
+/* Mobile responsive chatbot wrapper */
+@media (max-width: 768px) {
+  .chatbot-wrapper {
+    position: static;
+    right: auto;
+    bottom: auto;
+    z-index: 300;
+  }
+}
