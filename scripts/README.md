@@ -223,11 +223,363 @@ git push origin --delete v1.0.0
 - 🔒 **No credentials stored** in scripts or images
 - 🔒 **IAM-based authentication** through AWS CLI
 
+## 🚀 deploy-version.sh
+
+A comprehensive deployment script that deploys specific versions of the Weather App to AWS App Runner environments.
+
+### What it does:
+
+1. **🔍 Version Validation**: Validates that the specified version exists in both Git tags and ECR
+2. **🏢 Environment Management**: Supports develop, qa, and prod environments
+3. **🔐 Secrets Integration**: Uses AWS Secrets Manager for secure environment variable storage
+4. **☁️ App Runner Deployment**: Creates or updates AWS App Runner services
+5. **🏥 Health Monitoring**: Tests deployment health and provides service URLs
+
+### Prerequisites:
+
+- **AWS CLI**: Configured with appropriate permissions
+- **App Runner Permissions**: Service creation, update, and describe permissions
+- **ECR Permissions**: Read access to ECR repositories
+- **Secrets Manager Permissions**: Read access to secrets
+- **Git Repository**: Must be run from a Git repository
+
+### Required AWS Permissions:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "apprunner:CreateService",
+                "apprunner:UpdateService",
+                "apprunner:DescribeService",
+                "apprunner:TagResource"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecr:DescribeRepositories",
+                "ecr:DescribeImages"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:DescribeSecret",
+                "secretsmanager:GetSecretValue"
+            ],
+            "Resource": "arn:aws:secretsmanager:*:*:secret:/secrets/*-weatherapp*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:PassRole"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
+### Secret Setup (IMPORTANT):
+
+Before deploying, you MUST create a secret in AWS Secrets Manager for each environment:
+
+#### Secret Names:
+- Development: `/secrets/develop-weatherapp`
+- QA: `/secrets/qa-weatherapp`
+- Production: `/secrets/prod-weatherapp`
+
+#### Create Secret via AWS CLI:
+```bash
+# For development environment
+aws secretsmanager create-secret \
+  --name "/secrets/develop-weatherapp" \
+  --description "Environment variables for Weather App develop environment" \
+  --secret-string '{
+    "VITE_OPENAI_API_KEY": "your-openai-api-key",
+    "VITE_WEATHER_API_KEY": "your-openweathermap-api-key",
+    "VITE_OPENAI_API_URL": "https://api.openai.com/v1/chat/completions",
+    "VITE_WEATHER_API_URL": "https://api.openweathermap.org/data/2.5/weather"
+  }' \
+  --region eu-west-1
+
+# For QA environment
+aws secretsmanager create-secret \
+  --name "/secrets/qa-weatherapp" \
+  --description "Environment variables for Weather App qa environment" \
+  --secret-string '{
+    "VITE_OPENAI_API_KEY": "your-qa-openai-api-key",
+    "VITE_WEATHER_API_KEY": "your-qa-openweathermap-api-key",
+    "VITE_OPENAI_API_URL": "https://api.openai.com/v1/chat/completions",
+    "VITE_WEATHER_API_URL": "https://api.openweathermap.org/data/2.5/weather"
+  }' \
+  --region eu-west-1
+
+# For production environment
+aws secretsmanager create-secret \
+  --name "/secrets/prod-weatherapp" \
+  --description "Environment variables for Weather App prod environment" \
+  --secret-string '{
+    "VITE_OPENAI_API_KEY": "your-prod-openai-api-key",
+    "VITE_WEATHER_API_KEY": "your-prod-openweathermap-api-key",
+    "VITE_OPENAI_API_URL": "https://api.openai.com/v1/chat/completions",
+    "VITE_WEATHER_API_URL": "https://api.openweathermap.org/data/2.5/weather"
+  }' \
+  --region eu-west-1
+```
+
+#### Update Existing Secret:
+```bash
+aws secretsmanager update-secret \
+  --secret-id "/secrets/develop-weatherapp" \
+  --secret-string '{
+    "VITE_OPENAI_API_KEY": "updated-openai-key",
+    "VITE_WEATHER_API_KEY": "updated-weather-key"
+  }' \
+  --region eu-west-1
+```
+
+### Usage:
+
+#### Basic Deployment:
+```bash
+./scripts/deploy-version.sh <ENVIRONMENT> <VERSION>
+```
+
+#### Examples:
+```bash
+# Deploy v1.2.3 to development
+./scripts/deploy-version.sh develop v1.2.3
+
+# Deploy v2.0.0 to QA
+./scripts/deploy-version.sh qa v2.0.0
+
+# Deploy v1.5.2 to production
+./scripts/deploy-version.sh prod v1.5.2
+
+# Get help
+./scripts/deploy-version.sh --help
+```
+
+#### With Environment Variables:
+```bash
+# Use different AWS region
+AWS_REGION=us-east-1 ./scripts/deploy-version.sh develop v1.2.3
+
+# Use different ECR repository
+ECR_REPOSITORY_NAME=my-weather-app ./scripts/deploy-version.sh qa v1.2.3
+```
+
+### Configuration Options:
+
+| Environment Variable | Default | Description |
+|---------------------|---------|-------------|
+| `AWS_REGION` | `eu-west-1` | AWS region for all services |
+| `ECR_REPOSITORY_NAME` | `weatherapp` | ECR repository name |
+
+### App Runner Configuration:
+
+The script creates App Runner services with the following configuration:
+- **CPU**: 0.25 vCPU
+- **Memory**: 0.5 GB
+- **Port**: 8080
+- **Health Check**: HTTP on `/health` endpoint
+- **Auto-scaling**: Enabled
+- **Environment Variables**: From Secrets Manager
+
+### Service Naming Convention:
+
+App Runner services are named using the pattern: `weatherapp-<ENVIRONMENT>`
+
+Examples:
+- Development: `weatherapp-develop`
+- QA: `weatherapp-qa`
+- Production: `weatherapp-prod`
+
+### Validation Process:
+
+The script performs comprehensive validation before deployment:
+
+1. **Parameter Validation**: Checks environment and version format
+2. **Tool Validation**: Ensures Git and AWS CLI are available
+3. **Credentials Validation**: Verifies AWS credentials
+4. **Git Tag Validation**: Confirms version tag exists in Git
+5. **ECR Image Validation**: Verifies image exists in ECR
+6. **Secrets Validation**: Checks Secrets Manager secret exists
+
+### Deployment Workflow Example:
+
+```bash
+# 1. First, ensure you have published the version
+./scripts/package-and-publish.sh v1.2.3
+
+# 2. Create secrets (one-time setup per environment)
+aws secretsmanager create-secret \
+  --name "/secrets/develop-weatherapp" \
+  --secret-string '{"VITE_OPENAI_API_KEY":"sk-...","VITE_WEATHER_API_KEY":"..."}' \
+  --region eu-west-1
+
+# 3. Deploy to development
+./scripts/deploy-version.sh develop v1.2.3
+
+# Output:
+# ╔══════════════════════════════════════════════╗
+# ║        Weather App - Deployment Tool         ║
+# ╚══════════════════════════════════════════════╝
+#
+# [INFO] Environment: develop
+# [INFO] Version: v1.2.3
+# 
+# ╔════════════════════════════════════════════════════════════════╗
+# ║                         IMPORTANT NOTE                         ║
+# ╠════════════════════════════════════════════════════════════════╣
+# ║ This script requires a secret in AWS Secrets Manager at:      ║
+# ║ /secrets/develop-weatherapp                                    ║
+# ║                                                                ║
+# ║ The secret must contain your API keys as JSON:                ║
+# ║ {                                                              ║
+# ║   "VITE_OPENAI_API_KEY": "your-openai-key",                   ║
+# ║   "VITE_WEATHER_API_KEY": "your-weather-key",                 ║
+# ║   "VITE_OPENAI_API_URL": "https://api.openai.com/v1/..."       ║
+# ║   "VITE_WEATHER_API_URL": "https://api.openweathermap.org/..." ║
+# ║ }                                                              ║
+# ╚════════════════════════════════════════════════════════════════╝
+#
+# [SUCCESS] All prerequisites met!
+# [SUCCESS] Git tag 'v1.2.3' exists.
+# [SUCCESS] ECR image 'v1.2.3' exists and is ready for deployment.
+# [SUCCESS] Secret '/secrets/develop-weatherapp' exists and is accessible.
+# [INFO] App Runner service name: weatherapp-develop
+#
+# Ready to deploy v1.2.3 to develop environment.
+# Continue? (y/N): y
+#
+# [INFO] Starting deployment of v1.2.3 to develop environment...
+# [SUCCESS] App Runner configuration created
+# [INFO] Service 'weatherapp-develop' does not exist. Will create it.
+# [INFO] Creating new App Runner service: weatherapp-develop
+# [SUCCESS] App Runner service created: arn:aws:apprunner:eu-west-1:123456789:service/weatherapp-develop
+# [INFO] Waiting for service to be ready (this may take several minutes)...
+# ..........
+# [SUCCESS] Service is running!
+# [INFO] Service URL: https://abc123.eu-west-1.awsapprunner.com
+# [INFO] Testing deployment health check...
+# [SUCCESS] Health check passed! ✅
+# {
+#   "status": "healthy",
+#   "timestamp": "2024-01-01T12:00:00.000Z",
+#   "uptime": 45.123,
+#   "version": "1.0.0"
+# }
+#
+# [SUCCESS] 🎉 Deployment completed successfully!
+#
+# [INFO] Deployment Summary:
+#   - Environment: develop
+#   - Version: v1.2.3
+#   - Service: weatherapp-develop
+#   - Image: 123456789.dkr.ecr.eu-west-1.amazonaws.com/weatherapp:v1.2.3
+#   - URL: https://abc123.eu-west-1.awsapprunner.com
+#   - Health Check: https://abc123.eu-west-1.awsapprunner.com/health
+#
+# [NOTE] 💡 Next steps:
+#   - Test your application at: https://abc123.eu-west-1.awsapprunner.com
+#   - Monitor service status in AWS Console
+#   - Check logs if there are any issues
+#   - Consider setting up custom domain and SSL certificate
+```
+
+### Troubleshooting:
+
+#### Version Not Found in Git
+```bash
+# Check available tags
+git tag -l
+
+# Fetch latest tags
+git fetch --tags
+
+# Create missing tag (if needed)
+git tag v1.2.3
+git push origin v1.2.3
+```
+
+#### Version Not Found in ECR
+```bash
+# Check available images
+aws ecr describe-images --repository-name weatherapp --region eu-west-1
+
+# Build and push missing version
+./scripts/package-and-publish.sh v1.2.3
+```
+
+#### Secret Not Found
+```bash
+# List existing secrets
+aws secretsmanager list-secrets --region eu-west-1
+
+# Create missing secret
+aws secretsmanager create-secret \
+  --name "/secrets/develop-weatherapp" \
+  --secret-string '{"VITE_OPENAI_API_KEY":"your-key"}' \
+  --region eu-west-1
+```
+
+#### App Runner Service Issues
+```bash
+# Check service status
+aws apprunner describe-service \
+  --service-arn "arn:aws:apprunner:eu-west-1:ACCOUNT:service/weatherapp-develop" \
+  --region eu-west-1
+
+# View service logs in AWS Console
+# Go to: App Runner > Services > weatherapp-develop > Logs
+```
+
+#### Permission Denied
+```bash
+# Check AWS credentials
+aws sts get-caller-identity
+
+# Test specific permissions
+aws apprunner list-services --region eu-west-1
+aws ecr describe-repositories --region eu-west-1
+aws secretsmanager list-secrets --region eu-west-1
+```
+
+### Features:
+
+- ✅ **Multi-environment support** (develop, qa, prod)
+- ✅ **Version validation** against Git tags and ECR images
+- ✅ **Secrets Manager integration** for secure API key storage
+- ✅ **Service creation and updates** with zero-downtime deployments
+- ✅ **Health check validation** with automatic testing
+- ✅ **Comprehensive error handling** with helpful error messages
+- ✅ **Progress monitoring** with real-time status updates
+- ✅ **Service tagging** for resource management
+- ✅ **Cleanup on exit** with temporary file removal
+
+### Security Features:
+
+- 🔒 **Encrypted secrets** in AWS Secrets Manager
+- 🔒 **IAM-based authentication** with least privilege access
+- 🔒 **No hardcoded credentials** in scripts or containers
+- 🔒 **Environment separation** with isolated services and secrets
+- 🔒 **SSL/TLS encryption** provided by App Runner
+
 ## Future Scripts
 
 Additional automation scripts can be added to this directory:
 
-- `deploy.sh` - Deploy to staging/production environments
 - `rollback.sh` - Rollback to previous version
 - `cleanup.sh` - Clean up old images and resources
-- `test.sh` - Run integration tests against deployed image 
+- `test.sh` - Run integration tests against deployed image
+- `monitor.sh` - Monitor service health and metrics 
