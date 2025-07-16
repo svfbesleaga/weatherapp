@@ -1,10 +1,24 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styles from './Chatbot.module.css';
 
-const OPENAI_API_URL = import.meta.env.VITE_OPENAI_API_URL;
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const WEATHER_API_KEY = import.meta.env.VITE_WEATHER_API_KEY;
-const WEATHER_API_URL = import.meta.env.VITE_WEATHER_API_URL;
+// Support both runtime config and build-time environment variables
+const getRuntimeConfig = () => {
+  if (typeof window !== 'undefined' && window.__RUNTIME_CONFIG__) {
+    return window.__RUNTIME_CONFIG__;
+  }
+  return {
+    VITE_OPENAI_API_URL: import.meta.env.VITE_OPENAI_API_URL,
+    VITE_OPENAI_API_KEY: import.meta.env.VITE_OPENAI_API_KEY,
+    VITE_WEATHER_API_KEY: import.meta.env.VITE_WEATHER_API_KEY,
+    VITE_WEATHER_API_URL: import.meta.env.VITE_WEATHER_API_URL,
+  };
+};
+
+const config = getRuntimeConfig();
+const OPENAI_API_URL = config.VITE_OPENAI_API_URL;
+const OPENAI_API_KEY = config.VITE_OPENAI_API_KEY;
+const WEATHER_API_KEY = config.VITE_WEATHER_API_KEY;
+const WEATHER_API_URL = config.VITE_WEATHER_API_URL;
 
 
 
