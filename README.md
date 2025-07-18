@@ -1,14 +1,31 @@
 # Weather App
 
-A modern React + Vite application that provides real-time weather information, activity suggestions, and a conversational chatbot interface. The app features dynamic backgrounds based on weather and time of day, and leverages OpenAI and weather APIs for intelligent suggestions.
+A modern React + Vite application that provides real-time weather information, AI-generated city fun facts, activity suggestions, and a conversational chatbot interface. The app features dynamic backgrounds based on weather and time of day, automatic night mode, and leverages OpenAI and weather APIs for intelligent content generation.
 
 ## Features
 
 - **Weather Widget:** Displays current weather, temperature, humidity, pressure, and conditions for a user-specified city.
+- **Fun Facts Widget:** AI-powered widget that displays interesting and unique facts about the searched city, with a 3-second delayed loading for optimal UX.
 - **Activity Suggestions:** Recommends activities tailored to the weather and time of day, powered by AI.
 - **Chatbot:** Conversational interface for entering city names and receiving weather/activity info.
 - **Dynamic Backgrounds:** Visuals change based on weather and time (day, night, evening).
-- **Responsive UI:** Clean, modern, and mobile-friendly design.
+- **Night Mode:** Automatic text color adjustment to light gray during nighttime hours for better visual comfort.
+- **Responsive UI:** Clean, modern, and mobile-friendly design with glassmorphism styling.
+
+## Widget Layout
+
+The app features three main widgets that work together to provide a comprehensive weather and city information experience:
+
+1. **Weather Widget** (Top Left): Displays current weather conditions, temperature, and time of day
+2. **Fun Facts Widget** (Top Right): Shows AI-generated interesting facts about the city with a 3-second delay
+3. **Activity Widget** (Bottom Left): Lists weather-appropriate activity suggestions
+
+All widgets feature:
+- Glassmorphism design with frosted glass effect
+- Automatic night mode with light gray text
+- Responsive design that adapts to screen size
+- Loading animations and close buttons
+- Scrollable content when needed
 
 ## Getting Started
 
@@ -21,7 +38,7 @@ A modern React + Vite application that provides real-time weather information, a
 
 1. **Clone the repository:**
    ```sh
-   git clone <your-repo-url>
+   git clone git@github.com:svfbesleaga/weatherapp.git
    cd weatherapp
    ```
 
@@ -88,7 +105,7 @@ By default, the server runs on port `8080` (or the value of the `PORT` environme
 weatherapp/
   public/           # Static assets and background images
   src/              # React components and styles
-    components/     # WeatherWidget, ActivityWidget, Chatbot, etc.
+    components/     # WeatherWidget, FunFact, ActivityWidget, Chatbot, etc.
   server.cjs        # Express server for production
   index.html        # App entry point
   package.json      # Scripts and dependencies
