@@ -1,7 +1,7 @@
 import React from 'react';
 import './FunFact.css';
 
-export default function FunFact({ funFacts, isGenerating, weatherInfo, onClose }) {
+export default function FunFact({ funFacts, isGenerating, weatherInfo, timeOfDay, onClose }) {
   // Get the title with city name
   const getTitle = () => {
     return weatherInfo && weatherInfo.city 
@@ -9,10 +9,15 @@ export default function FunFact({ funFacts, isGenerating, weatherInfo, onClose }
       : 'Fun Facts';
   };
 
+  // Get styling class based on time of day
+  const getTextColorClass = () => {
+    return timeOfDay === 'night' ? 'funfact-night-text' : '';
+  };
+
   // Show loading state when generating fun facts
   if (isGenerating) {
     return (
-      <div className="funfact-widget funfact-list-widget">
+      <div className={`funfact-widget funfact-list-widget ${getTextColorClass()}`}>
         <div className="funfact-titlebar">
           <span role="img" aria-label="funfact" className="funfact-emoji">🎯</span>
           <span className="funfact-title">{getTitle()}</span>
@@ -38,7 +43,7 @@ export default function FunFact({ funFacts, isGenerating, weatherInfo, onClose }
   if (!funFacts || funFacts.length === 0) return null;
   
   return (
-    <div className="funfact-widget funfact-list-widget">
+    <div className={`funfact-widget funfact-list-widget ${getTextColorClass()}`}>
       <div className="funfact-titlebar">
         <span role="img" aria-label="funfact" className="funfact-emoji">🎯</span>
         <span className="funfact-title">{getTitle()}</span>

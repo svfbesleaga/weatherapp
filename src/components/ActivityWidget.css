@@ -331,6 +331,17 @@
 .activity-details {
   color: #000 !important;
 }
+
+/* Night time styling - light gray text */
+.activity-widget.activity-night-text,
+.activity-widget.activity-night-text .activity-titlebar,
+.activity-widget.activity-night-text .activity-title,
+.activity-widget.activity-night-text .activity-list,
+.activity-widget.activity-night-text .activity-list-item,
+.activity-widget.activity-night-text .activity-loading-text,
+.activity-widget.activity-night-text .activity-loading-dots span {
+  color: #e0e0e0 !important;
+}
 @keyframes activity-popin {
   0% { opacity: 0; transform: scale(0.7) translateY(30px); }
   80% { opacity: 1; transform: scale(1.05) translateY(-4px); }

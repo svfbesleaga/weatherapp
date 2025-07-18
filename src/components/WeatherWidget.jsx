@@ -34,9 +34,15 @@ function getTimeOfDayIcon(timeOfDay) {
 
 export default function WeatherWidget({ weatherInfo, timeOfDay }) {
   if (!weatherInfo) return null;
+  
+  // Get styling class based on time of day
+  const getTextColorClass = () => {
+    return timeOfDay === 'night' ? 'weather-night-text' : '';
+  };
+  
   const weatherIcon = getWeatherIcon(weatherInfo.icon, weatherInfo.desc);
   return (
-    <div className="weather-widget">
+    <div className={`weather-widget ${getTextColorClass()}`}>
       <div className="widget-header">
         <span className="widget-location">{weatherInfo.city}</span>
         <div className="widget-icon">

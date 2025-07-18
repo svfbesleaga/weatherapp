@@ -69,6 +69,15 @@
   font-weight: 400;
 }
 
+/* Night time styling - light gray text */
+.weather-widget.weather-night-text .widget-location,
+.weather-widget.weather-night-text .widget-temp,
+.weather-widget.weather-night-text .widget-details,
+.weather-widget.weather-night-text .widget-details span,
+.weather-widget.weather-night-text .widget-details b {
+  color: #e0e0e0 !important;
+}
+
 /* Mobile responsive styles */
 @media (max-width: 768px) {
   .weather-widget {

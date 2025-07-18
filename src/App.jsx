@@ -130,6 +130,7 @@ function App() {
           funFacts={funFacts} 
           isGenerating={isGeneratingFunFacts}
           weatherInfo={weatherInfo}
+          timeOfDay={tod}
           onClose={() => setShowFunFactWidget(false)}
         />
       )}
@@ -137,6 +138,7 @@ function App() {
         <ActivityWidget 
           activities={activities} 
           isGenerating={isGeneratingActivities}
+          timeOfDay={tod}
           onClose={() => setShowActivityWidget(false)}
         />
       )}

@@ -1,11 +1,16 @@
 import React from 'react';
 import './ActivityWidget.css';
 
-export default function ActivityWidget({ activities, isGenerating, onClose }) {
+export default function ActivityWidget({ activities, isGenerating, timeOfDay, onClose }) {
+  // Get styling class based on time of day
+  const getTextColorClass = () => {
+    return timeOfDay === 'night' ? 'activity-night-text' : '';
+  };
+
   // Show loading state when generating activities
   if (isGenerating) {
     return (
-      <div className="activity-widget activity-list-widget">
+      <div className={`activity-widget activity-list-widget ${getTextColorClass()}`}>
         <div className="activity-titlebar">
           <span role="img" aria-label="activity" className="activity-emoji">💡</span>
           <span className="activity-title">Suggested Activities</span>
@@ -31,7 +36,7 @@ export default function ActivityWidget({ activities, isGenerating, onClose }) {
   if (!activities || activities.length === 0) return null;
   
   return (
-    <div className="activity-widget activity-list-widget">
+    <div className={`activity-widget activity-list-widget ${getTextColorClass()}`}>
       <div className="activity-titlebar">
         <span role="img" aria-label="activity" className="activity-emoji">💡</span>
         <span className="activity-title">Suggested Activities</span>
