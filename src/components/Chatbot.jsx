@@ -40,7 +40,7 @@ async function fetchWeather(city) {
   };
 }
 
-function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGeneratingActivities, resetActivityWidget, timeOfDay }) {
+function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setFunFacts, setIsGeneratingActivities, setIsGeneratingFunFacts, resetActivityWidget, resetFunFactWidget, timeOfDay }) {
   const [input, setInput] = useState('');
   const messagesEndRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -73,6 +73,11 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
       setActivities([]);
     }
     
+    // Reset fun fact widget visibility and clear old fun facts
+    if (setFunFacts) {
+      setFunFacts([]);
+    }
+    
     let weatherInfo = null;
     let city = input.trim();
     try {
@@ -89,6 +94,14 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
       // Start generating activities (show loading state)
       if (setIsGeneratingActivities) {
         setIsGeneratingActivities(true);
+      }
+      
+      // Start generating fun facts with 3 second delay (show loading state)  
+      if (setIsGeneratingFunFacts && resetFunFactWidget) {
+        setTimeout(() => {
+          resetFunFactWidget();
+          setIsGeneratingFunFacts(true);
+        }, 3000);
       }
       
     } catch {
@@ -259,6 +272,18 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
           setIsGeneratingActivities(false);
         }
       }
+      
+      // Set fun facts with 3.5 second delay to allow brief loading animation
+      if (setFunFacts && weatherInfo) {
+        setTimeout(() => {
+          setFunFacts(['banana', 'apple']);
+          
+          // Stop generating fun facts loading state
+          if (setIsGeneratingFunFacts) {
+            setIsGeneratingFunFacts(false);
+          }
+        }, 3500);
+      }
     } catch {
       setMessages(msgs => [
         ...msgs,
@@ -268,6 +293,13 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setIsGe
       // Stop generating activities loading state on error
       if (setIsGeneratingActivities) {
         setIsGeneratingActivities(false);
+      }
+      
+      // Stop generating fun facts loading state on error (with delay consideration)
+      if (setIsGeneratingFunFacts) {
+        setTimeout(() => {
+          setIsGeneratingFunFacts(false);
+        }, 3500);
       }
     }
     setLoading(false);

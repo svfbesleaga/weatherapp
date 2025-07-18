@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import WeatherWidget from './components/WeatherWidget';
 import ActivityWidget from './components/ActivityWidget';
+import FunFact from './components/FunFact';
 import Chatbot from './components/Chatbot';
 import './App.css';
 
@@ -82,9 +83,12 @@ function getTimeOfDay(weatherInfo) {
 function App() {
   const [weatherInfo, setWeatherInfo] = useState(null);
   const [activities, setActivities] = useState([]);
+  const [funFacts, setFunFacts] = useState(['banana', 'apple']); // Default fun facts
   const [messages, setMessages] = useState([]);
   const [isGeneratingActivities, setIsGeneratingActivities] = useState(false);
+  const [isGeneratingFunFacts, setIsGeneratingFunFacts] = useState(false);
   const [showActivityWidget, setShowActivityWidget] = useState(true);
+  const [showFunFactWidget, setShowFunFactWidget] = useState(false);
 
   // Preload background images on component mount
   useEffect(() => {
@@ -121,6 +125,14 @@ function App() {
       backgroundImage: `url(${bgImage})`,
     }}>
       <WeatherWidget weatherInfo={weatherInfo} timeOfDay={tod} />
+      {showFunFactWidget && (
+        <FunFact 
+          funFacts={funFacts} 
+          isGenerating={isGeneratingFunFacts}
+          weatherInfo={weatherInfo}
+          onClose={() => setShowFunFactWidget(false)}
+        />
+      )}
       {showActivityWidget && (
         <ActivityWidget 
           activities={activities} 
@@ -134,8 +146,14 @@ function App() {
           setMessages={setMessages}
           setWeatherInfo={setWeatherInfo}
           setActivities={setActivities}
+          setFunFacts={setFunFacts}
           setIsGeneratingActivities={setIsGeneratingActivities}
+          setIsGeneratingFunFacts={setIsGeneratingFunFacts}
           resetActivityWidget={() => setShowActivityWidget(true)}
+          resetFunFactWidget={() => {
+            // Show FunFact widget with 3 second delay after ActivityWidget
+            setTimeout(() => setShowFunFactWidget(true), 3000);
+          }}
           timeOfDay={tod}
         />
       </div>
