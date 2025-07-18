@@ -20,7 +20,7 @@
   animation: funfact-popin 0.7s cubic-bezier(.68,-0.55,.27,1.55);
   margin-bottom: 0.5rem;
   user-select: none;
-  left: calc(2.5rem + 320px + 4rem);
+  left: calc(2.5rem + 320px + 3rem);
   right: calc(2.5rem + 320px + 2rem);
   top: 2.5rem;
   align-items: flex-start;
@@ -100,7 +100,7 @@
 .funfact-widget.funfact-list-widget {
   position: fixed;
   top: 2.5rem;
-  left: calc(2.5rem + 320px + 4rem); /* 1rem to the right of weather widget */
+  left: calc(2.5rem + 320px + 3rem); /* 1rem to the right of weather widget */
   right: calc(2.5rem + 320px + 2rem); /* End where ActivityWidget ends */
   bottom: auto;
   width: auto;
