@@ -2,7 +2,8 @@
   position: fixed;
   min-width: 0;
   max-width: none;
-  max-height: calc(100vh - 5rem); /* Prevent overflow of viewport */
+  height: auto; /* Fixed height to match typical WeatherWidget height */
+  max-height: 250px; /* Force scrolling when content exceeds this height */
   background: rgba(255,255,255,0.0032);
   box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
   backdrop-filter: blur(10px);
@@ -19,7 +20,7 @@
   animation: funfact-popin 0.7s cubic-bezier(.68,-0.55,.27,1.55);
   margin-bottom: 0.5rem;
   user-select: none;
-  left: calc(2.5rem + 320px + 5rem);
+  left: calc(2.5rem + 320px + 4rem);
   right: calc(2.5rem + 320px + 2rem);
   top: 2.5rem;
   align-items: flex-start;
@@ -99,12 +100,14 @@
 .funfact-widget.funfact-list-widget {
   position: fixed;
   top: 2.5rem;
-  left: calc(2.5rem + 320px + 5rem); /* 1rem to the right of weather widget */
+  left: calc(2.5rem + 320px + 4rem); /* 1rem to the right of weather widget */
   right: calc(2.5rem + 320px + 2rem); /* End where ActivityWidget ends */
   bottom: auto;
   width: auto;
   min-width: 0;
   max-width: none;
+  height: auto; /* Fixed height to match typical WeatherWidget height */
+  max-height: 250px; /* Force scrolling when content exceeds this height */
   background: rgba(255,255,255,0.0032);
   box-shadow: 0 8px 32px 0 rgba(31,38,135,0.37);
   backdrop-filter: blur(10px);
@@ -133,110 +136,17 @@
   box-shadow: 0 12px 40px 0 rgba(31,38,135,0.45);
 }
 
-/* Handle small screens where there's not enough space */
-@media (max-width: 768px) {
+/* Hide FunFact widget on mobile screens */
+@media (max-width: 1024px) {
   .funfact-widget,
   .funfact-widget.funfact-list-widget {
-    position: fixed;
-    top: 8rem; /* Below weather widget */
-    left: 0;
-    right: 0;
-    bottom: auto;
-    width: 100vw; /* Full viewport width */
-    max-width: 100vw;
-    min-width: 100vw;
-    margin: 0;
-    padding: 1.2rem 1.5rem;
-    border-radius: 8px 8px 8px 8px; /* Rounded corners */
-    z-index: 250; /* Between weather and chatbot */
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    overflow: hidden; /* Prevent overflow of container */
+    display: none !important; /* Hide completely on mobile */
   }
 
-  .funfact-widget-title {
-    flex-shrink: 0;
-    margin-bottom: 1rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  }
 
-  .funfact-list {
-    flex: 1;
-    overflow-y: auto;
-    overflow-x: hidden;
-    max-height: calc(100vh - 20rem); /* Ensure it doesn't exceed viewport */
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
-    margin: 0;
-    padding: 0 0 0.5rem 0;
-  }
-
-  .funfact-list::-webkit-scrollbar {
-    width: 6px;
-  }
-
-  .funfact-list::-webkit-scrollbar-track {
-    background: transparent;
-  }
-
-  .funfact-list::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 3px;
-  }
-
-  .funfact-list::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.5);
-  }
-
-  .funfact-item,
-  .funfact-list-item {
-    padding: 1rem 0;
-    font-size: 1rem;
-    line-height: 1.5;
-    word-break: break-word;
-    overflow-wrap: break-word;
-  }
-
-  .funfact-widget .close-button,
-  .funfact-widget .funfact-close {
-    width: 2rem;
-    height: 2rem;
-    font-size: 1.2rem;
-    margin-left: auto;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: auto;
-    align-self: flex-start;
-  }
 }
 
-.funfact-titlebar {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.7rem;
-  padding: 1.1rem 1.2rem 1.1rem 1.1rem;
-  border-radius: 20px 20px 0 0;
-  background: rgba(255,255,255,0.0018);
-  font-weight: 600;
-  width: 100%;
-}
 
-.funfact-emoji {
-  font-size: 1.7rem;
-  margin-right: 0.2rem;
-  filter: drop-shadow(0 2px 8px #fff8);
-  align-self: center; /* Center the emoji vertically */
-}
-
-.funfact-title {
-  flex: 1;
-  word-break: break-word;
-  font-weight: 600;
-  font-size: 1.2rem;
-  align-self: center; /* Center the title vertically */
-}
 
 .funfact-list {
   list-style: disc inside;
@@ -253,6 +163,7 @@
   word-break: break-word;
   overflow-wrap: break-word;
   flex: 1;
+  min-height: 0; /* Allow flex item to shrink below content size */
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;
@@ -312,6 +223,7 @@
   width: 100%;
   box-sizing: border-box;
   flex: 1;
+  min-height: 0; /* Allow flex item to shrink below content size */
   overflow: hidden;
   word-break: break-word;
   overflow-wrap: break-word;
