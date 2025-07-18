@@ -152,7 +152,7 @@ function App() {
           resetActivityWidget={() => setShowActivityWidget(true)}
           resetFunFactWidget={() => {
             // Show FunFact widget with 3 second delay after ActivityWidget
-            setTimeout(() => setShowFunFactWidget(true), 3000);
+            setTimeout(() => setShowFunFactWidget(true), 1000);
           }}
           timeOfDay={tod}
         />

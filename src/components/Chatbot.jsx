@@ -273,10 +273,54 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setFunF
         }
       }
       
-      // Set fun facts with 3.5 second delay to allow brief loading animation
+      // Generate fun facts with 3.5 second delay to allow brief loading animation
       if (setFunFacts && weatherInfo) {
-        setTimeout(() => {
-          setFunFacts(['banana', 'apple']);
+        setTimeout(async () => {
+          try {
+            // Call GPT for fun facts
+            const fetchWithTimeout = (url, options, timeoutMs) => {
+              return Promise.race([
+                fetch(url, options),
+                new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), timeoutMs))
+              ]);
+            };
+            
+            const response = await fetchWithTimeout(
+              OPENAI_API_URL,
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${OPENAI_API_KEY}`
+                },
+                body: JSON.stringify({
+                  model: 'gpt-3.5-turbo',
+                  messages: [
+                    { 
+                      role: 'system', 
+                      content: `You are a helpful assistant, and need to provide a max 300 characters Fun Fact about the input City. Provide only one interesting, unique fun fact about ${weatherInfo.city}. Keep it under 300 characters. Be specific and engaging.`
+                    },
+                    { 
+                      role: 'user', 
+                      content: `Tell me a fun fact about ${weatherInfo.city}` 
+                    }
+                  ]
+                })
+              },
+              15000 // 15 seconds timeout
+            );
+            
+            const data = await response.json();
+            const funFact = data.choices?.[0]?.message?.content || `${weatherInfo.city} is a fascinating city with rich history and culture.`;
+            
+            // Ensure it's under 300 characters
+            const truncatedFact = funFact.length > 300 ? funFact.substring(0, 297) + '...' : funFact;
+            
+            setFunFacts([truncatedFact]);
+          } catch (error) {
+            // Fallback fun fact if API fails
+            setFunFacts([`${weatherInfo.city} is a fascinating city with rich history and unique culture worth exploring.`]);
+          }
           
           // Stop generating fun facts loading state
           if (setIsGeneratingFunFacts) {
@@ -298,6 +342,10 @@ function Chatbot({ messages, setMessages, setWeatherInfo, setActivities, setFunF
       // Stop generating fun facts loading state on error (with delay consideration)
       if (setIsGeneratingFunFacts) {
         setTimeout(() => {
+          // Provide fallback fun fact on general error
+          if (setFunFacts && weatherInfo) {
+            setFunFacts([`${weatherInfo.city} is a fascinating city with rich history and unique culture worth exploring.`]);
+          }
           setIsGeneratingFunFacts(false);
         }, 3500);
       }
